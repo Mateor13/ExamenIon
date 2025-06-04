@@ -23,6 +23,9 @@ log.txt
 /platforms
 /plugins
 
+#Environment files
+
+
 # Compiled output
 /dist
 /tmp

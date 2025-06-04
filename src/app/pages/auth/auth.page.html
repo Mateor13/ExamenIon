@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>Inicio de sesión</ion-title>
+    <ion-title>Registro</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -23,8 +23,11 @@
       class="auth-input"
       required>
     </ion-input>
-    <ion-button expand="block" (click)="login()" class="auth-btn">Iniciar Sesión</ion-button>
-    <ion-button expand="block" fill="outline" color="secondary" (click)="register()" class="auth-btn">Registrarse</ion-button>
+    <ion-button expand="block" (click)="register()" class="auth-btn">Registrarse</ion-button>
+    <p class="auth-text">
+      ¿Ya tienes una cuenta? 
+      <ion-button fill="clear" (click)="regresarLogin()">Inicia sesión</ion-button>
+    </p>
     <p *ngIf="error" class="auth-error">{{error}}</p>
   </div>
 </ion-content>

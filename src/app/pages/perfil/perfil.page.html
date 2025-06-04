@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Completa tu perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="userSupabase">
+    <p><strong>Email:</strong> {{ email }}</p>
+    <p><strong>Nombre actual:</strong> {{ name }}</p>
+  </div>
+
+  <form (ngSubmit)="guardarPerfil()">
+    <ion-input [(ngModel)]="name" name="name" placeholder="Nombre" required></ion-input>
+    <input type="file" (change)="onFileChange($event)" accept="image/*" />
+    <ion-button type="submit">Guardar perfil</ion-button>
+  </form>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</ion-content>

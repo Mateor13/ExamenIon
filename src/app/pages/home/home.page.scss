@@ -117,3 +117,76 @@
 .logout-btn:active {
   transform: scale(1.08);
 }
+
+// Botones generales
+ion-button {
+  font-size: 1.1em;
+  font-weight: 600;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px #4f8cff22;
+  margin: 0 4px;
+  transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ion-button:active {
+  transform: scale(1.07);
+  box-shadow: 0 4px 16px #4f8cff44;
+}
+
+// Botón enviar
+.send-btn {
+  background: linear-gradient(90deg, #4f8cff 60%, #007bff 100%);
+  color: #fff;
+  border: none;
+}
+
+.send-btn:hover {
+  background: linear-gradient(90deg, #007bff 60%, #4f8cff 100%);
+}
+
+// Botón foto
+.photo-btn {
+  background: linear-gradient(90deg, #ffb347 60%, #ffcc33 100%);
+  color: #fff;
+  border: none;
+}
+
+.photo-btn:hover {
+  background: linear-gradient(90deg, #ffcc33 60%, #ffb347 100%);
+}
+
+// Botón ubicación
+.location-btn {
+  background: linear-gradient(90deg, #43e97b 60%, #38f9d7 100%);
+  color: #fff;
+  border: none;
+}
+
+.location-btn:hover {
+  background: linear-gradient(90deg, #38f9d7 60%, #43e97b 100%);
+}
+
+// Botón Pokémon
+.pokemon-btn {
+  background: linear-gradient(90deg, #f7971e 60%, #ffd200 100%);
+  color: #fff;
+  border: none;
+}
+
+.pokemon-btn:hover {
+  background: linear-gradient(90deg, #ffd200 60%, #f7971e 100%);
+}
+
+// Botón salir
+.logout-btn {
+  background: linear-gradient(90deg, #e74c3c 60%, #c0392b 100%);
+  color: #fff;
+  border: none;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(90deg, #c0392b 60%, #e74c3c 100%);
+}

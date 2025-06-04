@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonInput, IonIcon } from '@ionic/angular/standalone';
-import { SupabaseService } from 'src/app/services/supabase.service';
+import { AutenticacionService } from 'src/app/services/autenticacion.service';
 
 @Component({
   selector: 'app-auth',
@@ -15,32 +15,23 @@ import { SupabaseService } from 'src/app/services/supabase.service';
 export class AuthPage {
   email = '';
   password = '';
+  name = '';
+  imageFile: File | null = null;
   error = '';
 
-  constructor(private router: Router, private supabaseService: SupabaseService) { }
-
-  async login() {
-    try {
-      await this.supabaseService.signIn({
-        email: this.email,
-        password: this.password
-      })
-      this.router.navigate(['/home']);
-    } catch (error: any) {
-      this.error = error.message;
-    }
-
-  }
+  constructor(private router: Router, private authService: AutenticacionService) { }
 
   async register() {
-    try {
-      await this.supabaseService.signUp({
-        email: this.email,
-        password: this.password
-      });
-      alert('Registration successful! Please check your email for confirmation.');
-    } catch (error: any) {
-      this.error = error.message;
-    }
+  try {
+    await this.authService.signUp(this.email, this.password);
+    alert('¡Registro exitoso! Por favor revisa tu correo para confirmar.');
+    this.router.navigate(['/login']);
+  } catch (error: any) {
+    this.error = error.message;
+  }
+}
+
+  async regresarLogin(){
+    this.router.navigate(['/login']);
   }
 }
