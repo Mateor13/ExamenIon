@@ -50,7 +50,7 @@ export class ChatService {
 
   // Escuchar mensajes en tiempo real con tipado correcto
   getMessages(currentUserId: string): Observable<ChatMessage[]> {
-    const messagesRef = collection(this.firestore, 'messages');
+    const messagesRef = collection(this.firestore, 'messages1');
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
     
     return collectionData(q, { idField: 'id' }).pipe(
@@ -72,7 +72,7 @@ export class ChatService {
       message,
       timestamp: new Date()
     };
-    await addDoc(collection(this.firestore, 'messages'), msg);
+    await addDoc(collection(this.firestore, 'messages1'), msg);
   }
 
   // Enviar ubicación usando datos de Supabase
@@ -85,7 +85,7 @@ export class ChatService {
       timestamp: new Date(),
       location: { lat, lng }
     };
-    await addDoc(collection(this.firestore, 'messages'), msg);
+    await addDoc(collection(this.firestore, 'messages1'), msg);
   }
 
   async sendImageMessage(imageUrl: string, user: { id: string, name: string, photoURL: string }) {
@@ -97,6 +97,6 @@ export class ChatService {
       timestamp: new Date(),
       imageUrl
     };
-    await addDoc(collection(this.firestore, 'messages'), msg);
+    await addDoc(collection(this.firestore, 'messages1'), msg);
   }
 }

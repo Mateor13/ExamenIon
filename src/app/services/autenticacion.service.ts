@@ -42,7 +42,6 @@ export class AutenticacionService {
   async getFirestoreProfileById(userId: string): Promise<{ id: string, username?: string, avatar_url?: string } | null> {
     const userDocRef = doc(this.firestore, 'profiles', userId);
     const userSnap = await getDoc(userDocRef);
-    console.log('Buscando perfil:', userId, 'Existe:', userSnap.exists(), 'Datos:', userSnap.data());
     if (userSnap.exists()) {
       return userSnap.data() as { id: string, username?: string, avatar_url?: string };
     }
