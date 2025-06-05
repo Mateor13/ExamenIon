@@ -12,8 +12,8 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule, 
-    IonInput,      
+    FormsModule,
+    IonInput,
     IonButton,
     IonContent,
     IonHeader,
@@ -25,7 +25,7 @@ export class PerfilPage implements OnInit {
   name: string = '';
   imageFile: File | null = null;
   error: string = '';
-  userSupabase: any = null; // <-- Agrega esta línea
+  userSupabase: any = null; 
   email: string = '';
 
   constructor(private router: Router, private authService: AutenticacionService) { }
@@ -47,16 +47,16 @@ export class PerfilPage implements OnInit {
   }
 
   async guardarPerfil() {
-  if (this.name.trim() && this.imageFile) {
-    try {
-      await this.authService.saveProfile(this.name, this.imageFile);
-      alert('Perfil actualizado exitosamente.');
-      this.router.navigate(['/home']);
-    } catch (error: any) {
-      this.error = error.message || 'Error al guardar el perfil.';
+    if (this.name.trim() && this.imageFile) {
+      try {
+        await this.authService.saveProfile(this.name, this.imageFile);
+        alert('Perfil actualizado exitosamente.');
+        this.router.navigate(['/home']);
+      } catch (error: any) {
+        this.error = error.message || 'Error al guardar el perfil.';
+      }
+    } else {
+      this.error = 'Por favor ingresa tu nombre y selecciona una imagen de perfil.';
     }
-  } else {
-    this.error = 'Por favor ingresa tu nombre y selecciona una imagen de perfil.';
   }
-}
 }

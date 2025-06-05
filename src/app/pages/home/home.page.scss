@@ -1,192 +1,375 @@
-.chat-content {
-    --padding-bottom: 80px;
-    background: #f4f6fb;
+// Variables de colores
+$primary-color: #3a8eff;
+$secondary-color: #0056d2;
+$background-color: #4b433a;
+$form-background: #1e1e1e;
+$my-message-bg: #005c4b;
+$other-message-bg: #353535;
+$white: #fff;
+$black: #222;
+
+// Estilos generales
+ion-button {
+  --background: transparent;
+  --background-activated: transparent;
+  --background-focused: transparent;
+  --background-hover: transparent;
+  --border-radius: 50%;
+  --box-shadow: none;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  margin: 0;
+  width: 40px;
+  height: 40px;
+  
+  &::part(native) {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    min-width: auto;
+    min-height: auto;
   }
-  .messages-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 16px 8px 80px 8px;
+}
+
+/* Actualiza las clases de los botones */
+.icon-btn {
+  --border-radius: 50%;
+  margin: 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  
+  ion-icon {
+    font-size: 20px;
+    color: white;
   }
-  .my-message {
-    align-self: flex-end;
+
+  /* Estilos específicos para cada tipo de botón */
+  &.send-btn {
+    --background: #0056d2;
+    --background-activated: #003d99;
   }
-  .other-message {
-    align-self: flex-start;
+
+  &.location-btn {
+    --background: #43e97b;
+    --background-activated: #2bc55d;
   }
-  .bubble {
-    background: #e0e7ff;
-    color: #222;
-    padding: 10px 16px;
-    border-radius: 18px;
-    max-width: 80vw;
-    box-shadow: 0 2px 8px #0001;
-    position: relative;
-    margin-bottom: 2px;
-    word-break: break-word;
+
+  &.pokemon-btn {
+    --background: #f7971e;
+    --background-activated: #e07d0a;
   }
-  .my-message .bubble {
-    background: #4f8cff;
-    color: #fff;
-    border-bottom-right-radius: 4px;
+
+  &.photo-btn {
+    --background: #ffb347;
+    --background-activated: #ff9e1a;
   }
-  .other-message .bubble {
-    background: #e0e7ff;
-    color: #222;
-    border-bottom-left-radius: 4px;
+
+  &.logout-btn {
+    --background: #e74c3c;
+    --background-activated: #c0392b;
+    --border-radius: 18px;
+    width: auto;
+    padding: 0 12px;
   }
+}
+
+ion-content.chat-content {
+  --padding-bottom: 80px; // Espacio para el formulario fijo
+  background-color: $background-color;
+  position: relative;
+  height: 100%;
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 8px 90px; // Más padding abajo para el formulario
+  min-height: calc(100% - 56px); // Altura del header
+  overflow-y: auto;
+}
+
+// Contenedor del formulario fijo
+.fixed-form-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background-color: #1e1e1e;
+  padding: 8px;
+  border-top: 1px solid #333;
+}
+
+.chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// Estilos de los mensajes
+.message-row {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 8px;
+  max-width: 100%;
+}
+
+.my-message {
+  align-self: flex-end;
+}
+
+.other-message {
+  align-self: flex-start;
+}
+
+.bubble {
+  padding: 12px 16px;
+  border-radius: 18px;
+  max-width: 75%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  margin-bottom: 2px;
+  word-break: break-word;
+  line-height: 1.4;
+  
   .sender {
     font-size: 12px;
     font-weight: bold;
-    display: block;
-    margin-bottom: 2px;
-    opacity: 0.7;
+    margin-bottom: 4px;
+    opacity: 0.8;
   }
+  
+  .text {
+    display: block;
+    margin-bottom: 4px;
+  }
+  
   .date {
     font-size: 10px;
-    color: #888;
-    float: right;
-    margin-left: 8px;
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 4px;
   }
-  .chat-form {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100vw;
-    display: flex;
-    gap: 8px;
-    background: #fff;
-    padding: 10px 12px 10px 12px;
-    box-shadow: 0 -2px 8px #0001;
-    z-index: 10;
-    align-items: center;
+}
+
+.my-message .bubble {
+  background: $my-message-bg;
+  color: $white;
+  border-bottom-right-radius: 4px;
+}
+
+.other-message .bubble {
+  background: $other-message-bg;
+  color: $white;
+  border-bottom-left-radius: 4px;
+}
+
+.reverse-row {
+  flex-direction: row-reverse;
+}
+
+.avatar-side {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin: 0 8px;
+  object-fit: cover;
+  border: 2px solid $white;
+  background: #eee;
+}
+
+.message-image {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  
+  .chat-input {
+    flex: 1;
+    --background: #fff;
+    --padding-start: 16px;
+    --border-radius: 20px;
+    --color: #222;
   }
-  ion-input {
-    flex: 1 1 auto;
-    --padding-start: 14px;
-    --padding-end: 14px;
-    --background: #f4f6fb;
-    border-radius: 18px;
-    font-size: 1.1em;
-    min-height: 48px;
-    margin-right: 0;
-  }
+  
   .send-btn {
-  flex: 0 0 auto;
-  font-size: 1.2em;
-  padding: 0 32px;
-  height: 56px;
-  border-radius: 18px;
-  background: linear-gradient(90deg, #4f8cff 60%, #007bff 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px #4f8cff33;
-  transition: transform 0.1s;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px; // Espacio entre icono y texto
-  span {
+    min-width: 48px;
+    --border-radius: 20px;
     margin: 0;
-    padding: 0;
-    display: inline;
-    font-size: 1em;
-    line-height: 1;
   }
 }
-.send-btn:active {
-  transform: scale(1.08);
+
+// Estilos del formulario
+.chat-input-container {
+  display: flex;
+  align-items: center;
+  background-color: #3a8eff;
+  padding: 8px 12px;
+  border-radius: 25px;
+  gap: 8px;
+
+  ion-button {
+    flex-shrink: 0; 
+  }
 }
 
-.logout-btn {
-  flex: 0 0 auto;
-  font-size: 1.1em;
-  padding: 0 24px;
-  height: 48px;
+.chat-input {
+  flex: 1;
+  --background: $white;
+  --color: $black;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --placeholder-color: #666;
   border-radius: 18px;
-  background: linear-gradient(90deg, #e74c3c 60%, #c0392b 100%);
-  color: #fff !important;
-  font-weight: bold;
-  margin-left: 8px;
+  font-size: 1em;
+  min-height: 44px;
+}
+
+// Estilos de los botones
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border: none;
-}
-.logout-btn:active {
-  transform: scale(1.08);
+  transition: transform 0.2s, background 0.2s;
+  
+  ion-icon {
+    font-size: 20px;
+    color: $white;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
-// Botones generales
-ion-button {
-  font-size: 1.1em;
-  font-weight: 600;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px #4f8cff22;
-  margin: 0 4px;
-  transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
+.actions-row {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+  }
 }
 
-ion-button:active {
-  transform: scale(1.07);
-  box-shadow: 0 4px 16px #4f8cff44;
+.icon-btn {
+  --border-radius: 18px;
+  min-width: 60px;
+  height: 40px;
+  margin: 0;
+  flex-shrink: 0;
+  
+  ion-icon {
+    font-size: 20px;
+  }
+  
+  .button-label {
+    font-size: 12px;
+    margin-left: 4px;
+    display: none;
+  }
 }
 
-// Botón enviar
 .send-btn {
-  background: linear-gradient(90deg, #4f8cff 60%, #007bff 100%);
-  color: #fff;
-  border: none;
+  --background: #0056d2;
 }
 
-.send-btn:hover {
-  background: linear-gradient(90deg, #007bff 60%, #4f8cff 100%);
-}
-
-// Botón foto
-.photo-btn {
-  background: linear-gradient(90deg, #ffb347 60%, #ffcc33 100%);
-  color: #fff;
-  border: none;
-}
-
-.photo-btn:hover {
-  background: linear-gradient(90deg, #ffcc33 60%, #ffb347 100%);
-}
-
-// Botón ubicación
-.location-btn {
-  background: linear-gradient(90deg, #43e97b 60%, #38f9d7 100%);
-  color: #fff;
-  border: none;
-}
-
-.location-btn:hover {
-  background: linear-gradient(90deg, #38f9d7 60%, #43e97b 100%);
-}
-
-// Botón Pokémon
 .pokemon-btn {
-  background: linear-gradient(90deg, #f7971e 60%, #ffd200 100%);
-  color: #fff;
-  border: none;
+  --background: #f7971e;
 }
 
-.pokemon-btn:hover {
-  background: linear-gradient(90deg, #ffd200 60%, #f7971e 100%);
+.pokemon-btn {
+  --background: #f7971e;
 }
 
-// Botón salir
+.photo-btn {
+  --background: #ffb347;
+}
+
 .logout-btn {
-  background: linear-gradient(90deg, #e74c3c 60%, #c0392b 100%);
-  color: #fff;
-  border: none;
+  --background: #e74c3c;
 }
 
-.logout-btn:hover {
-  background: linear-gradient(90deg, #c0392b 60%, #e74c3c 100%);
+// Efectos hover para los botones (si es necesario)
+@media (hover: hover) {
+  .icon-btn:hover {
+    opacity: 0.9;
+  }
+}
+
+// Ajustes para pantallas pequeñas
+@media (max-width: 576px) {
+  .bubble {
+    max-width: 85%;
+  }
+  
+  .chat-input-container {
+    padding: 6px 10px;
+  }
+  
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .input-row {
+    .chat-input {
+      --padding-start: 12px;
+    }
+    
+    .send-btn {
+      min-width: 40px;
+    }
+  }
+  
+  .icon-btn {
+    min-width: 40px;
+    height: 36px;
+    
+    .button-label {
+      display: inline;
+    }
+  }
+}
+
+@media (max-width: 400px) {
+  .actions-row {
+    gap: 2px;
+  }
+  
+  .icon-btn {
+    min-width: 36px;
+    
+    .button-label {
+      display: none;
+    }
+  }
 }

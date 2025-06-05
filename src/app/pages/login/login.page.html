@@ -1,17 +1,42 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Iniciar Sesión</ion-title>
-  </ion-toolbar>
-</ion-header>
 
-<ion-content class="ion-padding">
-  <form (ngSubmit)="login()">
-    <ion-input [(ngModel)]="email" name="email" type="email" placeholder="Correo electrónico" required></ion-input>
-    <ion-input [(ngModel)]="password" name="password" type="password" placeholder="Contraseña" required></ion-input>
-    <ion-button expand="block" type="submit">Entrar</ion-button>
-  </form>
-  <ion-button expand="block" fill="outline" color="secondary" (click)="goToRegister()">
-    ¿No tienes cuenta? Regístrate
-  </ion-button>
-  <p *ngIf="error" style="color:red; text-align:center;">{{error}}</p>
+<ion-content>
+  <div class="login-container">
+    <h2 class="login-title">Inicio de Sesión</h2>
+
+    <form class="login-form" (ngSubmit)="login()">
+      <div class="input-field">
+        <label class="input-label">Correo electrónico</label>
+        <ion-input 
+          [(ngModel)]="email" 
+          name="email" 
+          type="email" 
+          placeholder="user@example.com" 
+          required>
+        </ion-input>
+      </div>
+
+      <div class="input-field">
+        <label class="input-label">Contraseña</label>
+        <ion-input 
+          [(ngModel)]="password" 
+          name="password" 
+          type="password" 
+          placeholder="••••••••" 
+          required>
+        </ion-input>
+      </div>
+
+      <ion-button expand="block" type="submit" class="submit-btn">
+        Entrar
+      </ion-button>
+
+      <div *ngIf="error" class="error-message">
+        {{error}}
+      </div>
+    </form>
+
+    <ion-button expand="block" fill="outline" class="register-btn" (click)="goToRegister()">
+      ¿No tienes cuenta? Regístrate
+    </ion-button>
+  </div>
 </ion-content>

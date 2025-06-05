@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonInput, IonIcon } from '@ionic/angular/standalone';
@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 import { ChatService, ChatMessage } from 'src/app/services/chat.service';
 import { AutenticacionService } from 'src/app/services/autenticacion.service';
 import { HttpClient } from '@angular/common/http';
-
+import { ActionSheetController } from '@ionic/angular';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -22,26 +23,26 @@ import { HttpClient } from '@angular/common/http';
     FormsModule,
     IonButton,
     IonIcon,
-    IonInput 
+    IonInput
   ]
 })
 export class HomePage implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('galleryInput') galleryInput!: ElementRef<HTMLInputElement>;
   email = '';
-  messages$: Observable<ChatMessage[]>;
+  messages$!: Observable<ChatMessage[]>;
   message = '';
   name = '';
   error = '';
   userSupabase: any = null;
-  pokemonName = '';
 
   constructor(
     private router: Router,
     private authService: AutenticacionService,
     private chatService: ChatService,
-    private http: HttpClient
-  ) {
-    this.messages$ = this.chatService.getMessages();
-  }
+    private http: HttpClient,
+    private actionSheetCtrl: ActionSheetController
+  ) { }
 
   async ngOnInit() {
     const { data } = await this.authService.client.auth.getUser();
@@ -51,17 +52,15 @@ export class HomePage implements OnInit {
       this.userSupabase = data.user;
       this.email = data.user.email || '';
       this.name = data.user.user_metadata?.['full_name'] || data.user.email?.split('@')[0] || '';
+      // Inicializa messages$ después de tener el userSupabase
+      this.messages$ = this.chatService.getMessages(this.userSupabase.id);
     }
   }
 
   async sendMessage() {
     if (!this.message.trim() || !this.userSupabase) return;
     try {
-      const user = {
-        id: this.userSupabase.id,
-        name: this.userSupabase.user_metadata?.full_name || this.userSupabase.email,
-        photoURL: this.userSupabase.user_metadata?.avatar_url || ''
-      };
+      const user = await this.getUserProfile();
       await this.chatService.sendMessage(this.message, user);
       this.message = '';
     } catch (error: any) {
@@ -74,11 +73,7 @@ export class HomePage implements OnInit {
     try {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          const user = {
-            id: this.userSupabase.id,
-            name: this.userSupabase.user_metadata?.full_name || this.userSupabase.email,
-            photoURL: this.userSupabase.user_metadata?.avatar_url || ''
-          };
+          const user = await this.getUserProfile();
           await this.chatService.sendLocation(
             position.coords.latitude,
             position.coords.longitude,
@@ -94,60 +89,150 @@ export class HomePage implements OnInit {
     }
   }
 
+
   async onImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files || !input.files[0] || !this.userSupabase) return;
     const file = input.files[0];
 
-    // 1. Sube la imagen a Supabase Storage
+    // Sube la imagen a Supabase Storage
     const filePath = `chat/${this.userSupabase.id}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await this.authService.client.storage
       .from('chat-images')
       .upload(filePath, file, { upsert: true });
     if (uploadError) {
-      console.log(uploadError)
       this.error = 'Error subiendo imagen';
       return;
     }
 
-    // 2. Obtén la URL pública de la imagen
+    // Obtén la URL pública de la imagen
     const { data: publicUrlData } = this.authService.client
       .storage
       .from('chat-images')
       .getPublicUrl(filePath);
     const imageUrl = publicUrlData.publicUrl;
 
-    // 3. Envía el mensaje con la URL de la imagen a Firebase
-    const user = {
-      id: this.userSupabase.id,
-      name: this.userSupabase.user_metadata?.full_name || this.userSupabase.email,
-      photoURL: this.userSupabase.user_metadata?.avatar_url || ''
-    };
+    // Envía el mensaje con la URL de la imagen a Firebase
+    const user = await this.getUserProfile();
     await this.chatService.sendImageMessage(imageUrl, user);
   }
 
   async sendPokemon() {
-    if (!this.pokemonName.trim() || !this.userSupabase) return;
+    const pokemonName = this.message.trim();
+    if (!pokemonName || !this.userSupabase) return;
+
     try {
       const response: any = await this.http
-        .get(`https://pokeapi.co/api/v2/pokemon/${this.pokemonName.toLowerCase()}`)
+        .get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
         .toPromise();
 
-      // 3 características: nombre, altura, peso
-      const name = response.name;
-      const height = response.height;
-      const weight = response.weight;
-      const message = `Pokémon: ${name}\nAltura: ${height}\nPeso: ${weight}`;
+      const name = response.name.charAt(0).toUpperCase() + response.name.slice(1);
+      const id = response.id;
+      const height = (response.height / 10).toFixed(2); // metros
+      const weight = (response.weight / 10).toFixed(2); // kg
+      const abilities = response.abilities.map((a: any) => a.ability.name).join(', ');
 
-      const user = {
-        id: this.userSupabase.id,
-        name: this.userSupabase.user_metadata?.full_name || this.userSupabase.email,
-        photoURL: this.userSupabase.user_metadata?.avatar_url || ''
-      };
+      const message =
+        `#${id} ${name}\n` +
+        `Altura: ${height} m\n` +
+        `Peso: ${weight} kg\n` +
+        `Habilidades: ${abilities}`;
+
+      const user = await this.getUserProfile();
       await this.chatService.sendMessage(message, user);
-      this.pokemonName = '';
+      this.message = '';
     } catch (error: any) {
-      this.error = 'Pokémon no encontrado';
+      this.error = 'Pokémon no encontrado. Intenta con otro nombre.';
+      setTimeout(() => this.error = '', 3000);
+    }
+  }
+
+  async getUserProfile() {
+    const profile = await this.authService.getFirestoreProfileById(this.userSupabase.id);
+    return {
+      id: this.userSupabase.id,
+      name: profile?.username || this.userSupabase.email,
+      photoURL: profile?.avatar_url || ''
+    };
+  }
+
+  async presentPhotoOptions() {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Enviar foto',
+      buttons: [
+        {
+          text: 'Tomar foto',
+          icon: 'camera',
+          handler: () => this.takePhoto()
+        },
+        {
+          text: 'Seleccionar de galería',
+          icon: 'images',
+          handler: () => this.selectFromGallery()
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  async takePhoto() {
+    // Usar Capacitor Camera para tomar foto
+    const image = await Camera.getPhoto({
+      quality: 90,
+      allowEditing: false,
+      resultType: CameraResultType.Uri,
+      source: CameraSource.Camera
+    });
+
+    if (image.webPath) {
+      await this.uploadImage(image.webPath);
+    }
+  }
+
+  async selectFromGallery() {
+    const image = await Camera.getPhoto({
+      quality: 90,
+      allowEditing: false,
+      resultType: CameraResultType.Uri,
+      source: CameraSource.Photos
+    });
+
+    if (image.webPath) {
+      await this.uploadImage(image.webPath);
+    }
+  }
+
+  async uploadImage(imagePath: string) {
+    try {
+      // Convertir la imagen a blob
+      const response = await fetch(imagePath);
+      const blob = await response.blob();
+
+      // Subir a Supabase Storage
+      const filePath = `chat/${this.userSupabase.id}/${Date.now()}.jpg`;
+      const { error: uploadError } = await this.authService.client.storage
+        .from('chat-images')
+        .upload(filePath, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Obtener URL pública
+      const { data: publicUrlData } = this.authService.client
+        .storage
+        .from('chat-images')
+        .getPublicUrl(filePath);
+
+      // Enviar mensaje con la imagen
+      const user = await this.getUserProfile();
+      await this.chatService.sendImageMessage(publicUrlData.publicUrl, user);
+    } catch (error) {
+      this.error = 'Error al subir la imagen';
+      console.error(error);
     }
   }
 

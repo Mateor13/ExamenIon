@@ -1,7 +1,23 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collectionData, collection, addDoc, query, orderBy } from '@angular/fire/firestore';
+import { 
+  Firestore, 
+  collectionData, 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  getDocs,
+  DocumentData 
+} from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+export interface ChatUser {
+  id: string;
+  username: string;
+  avatar_url: string;
+}
 
 export interface ChatMessage {
   id?: string;
@@ -15,6 +31,7 @@ export interface ChatMessage {
     lat: number;
     lng: number;
   };
+  isCurrentUser?: boolean;
 }
 
 @Injectable({
@@ -23,11 +40,27 @@ export interface ChatMessage {
 export class ChatService {
   constructor(private firestore: Firestore, private auth: Auth) { }
 
-  // Escuchar mensajes en tiempo real
-  getMessages(): Observable<ChatMessage[]> {
+  async getAllChatUsers(): Promise<ChatUser[]> {
+    const usersRef = collection(this.firestore, 'profiles');
+    const snapshot = await getDocs(usersRef);
+    return snapshot.docs
+      .map(doc => doc.data() as ChatUser)
+      .filter(user => user.username && user.avatar_url);
+  }
+
+  // Escuchar mensajes en tiempo real con tipado correcto
+  getMessages(currentUserId: string): Observable<ChatMessage[]> {
     const messagesRef = collection(this.firestore, 'messages');
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
-    return collectionData(q, { idField: 'id' }) as Observable<ChatMessage[]>;
+    
+    return collectionData(q, { idField: 'id' }).pipe(
+      map(messages => 
+        (messages as any[]).map(msg => ({
+          ...msg,
+          isCurrentUser: msg['uid'] === currentUserId
+        } as ChatMessage))
+      )
+    );
   }
 
   // Enviar mensaje de texto usando datos de Supabase

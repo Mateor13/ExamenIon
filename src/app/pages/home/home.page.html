@@ -8,50 +8,61 @@
   <div *ngIf="error" class="error">{{ error }}</div>
   <div class="messages-container">
     <div *ngFor="let msg of (messages$ | async)"
-      [ngClass]="{'my-message': msg.uid === userSupabase?.id, 'other-message': msg.uid !== userSupabase?.id}">
-      <div class="bubble">
-        <img *ngIf="msg.photoURL" [src]="msg.photoURL" class="avatar" />
-        <span class="sender">{{ msg.displayName }}</span>
-        <span class="text" *ngIf="!msg.location && !msg.imageUrl">{{ msg.message }}</span>
-        <span class="text" *ngIf="msg.location">
-          <a [href]="'https://maps.google.com/?q=' + msg.location.lat + ',' + msg.location.lng" target="_blank">
-            📍 Ver ubicación
-          </a>
-        </span>
-        <span class="text" *ngIf="msg.imageUrl">
-          <img [src]="msg.imageUrl" alt="Imagen enviada" style="max-width: 200px; border-radius: 8px;">
-        </span>
-        <span class="date">
-          {{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'shortTime') : (msg.timestamp | date:'shortTime') }}
-        </span>
+      [ngClass]="{'my-message': msg.isCurrentUser, 'other-message': !msg.isCurrentUser}">
+      <div class="message-row" [ngClass]="{'reverse-row': msg.uid === userSupabase?.id}">
+        <img *ngIf="msg.photoURL" [src]="msg.photoURL" class="avatar-side" />
+        <div class="bubble">
+          <span class="sender">{{ msg.displayName }}</span>
+          <span class="text" *ngIf="!msg.location && !msg.imageUrl">{{ msg.message }}</span>
+          <span class="text" *ngIf="msg.location">
+            <a [href]="'https://maps.google.com/?q=' + msg.location.lat + ',' + msg.location.lng" target="_blank">
+              📍 Ver ubicación
+            </a>
+          </span>
+          <span class="text" *ngIf="msg.imageUrl">
+            <img [src]="msg.imageUrl" alt="Imagen enviada" class="message-image">
+          </span>
+          <span class="date">
+            {{ msg.timestamp?.toDate ? (msg.timestamp.toDate() | date:'shortTime') : (msg.timestamp | date:'shortTime')
+            }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
-  <form class="chat-form" (ngSubmit)="sendMessage()">
-    <ion-input [(ngModel)]="message" name="message" placeholder="Escribe tu mensaje" required></ion-input>
-    <ion-button type="submit" [disabled]="!message.trim()" class="send-btn">
-      <ion-icon name="send" style="margin-right:6px;"></ion-icon>
-      <span>Enviar</span>
-    </ion-button>
-    <!-- Botón para enviar foto -->
-    <input type="file" accept="image/*" capture="environment" (change)="onImageSelected($event)" hidden #fileInput>
-    <ion-button fill="solid" class="photo-btn" (click)="fileInput.click()" type="button">
-      <ion-icon name="camera"></ion-icon>
-      <span>Foto</span>
-    </ion-button>
-    <ion-button fill="solid" class="location-btn" (click)="sendLocation()" type="button">
-      <ion-icon name="location"></ion-icon>
-      <span>Ubicación actual</span>
-    </ion-button>
-    <!-- Campo y botón para buscar Pokémon -->
-    <ion-input [(ngModel)]="pokemonName" name="pokemonName" placeholder="Nombre de Pokémon"></ion-input>
-    <ion-button fill="solid" class="pokemon-btn" (click)="sendPokemon()" type="button">
-      <ion-icon name="logo-octocat"></ion-icon>
-      <span>Características del Pokémon</span>
-    </ion-button>
-    <ion-button fill="solid" class="logout-btn" (click)="logout()" type="button">
-      <ion-icon name="log-out-outline"></ion-icon>
-      Salir
-    </ion-button>
-  </form>
 </ion-content>
+
+<!-- Formulario fijo en la parte inferior -->
+<div class="fixed-form-container">
+  <form class="chat-form" (ngSubmit)="sendMessage()">
+    <div class="input-row">
+      <ion-input [(ngModel)]="message" name="message" placeholder="Escribe un mensaje o un Pokémon..." required
+        class="chat-input"></ion-input>
+      <ion-button type="submit" [disabled]="!message.trim()" class="icon-btn send-btn" title="Enviar">
+        <ion-icon name="send"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="actions-row">
+      <ion-button fill="clear" class="icon-btn location-btn" (click)="sendLocation()" title="Ubicación">
+        <ion-icon name="location"></ion-icon>
+        <span class="button-label">Ubicación</span>
+      </ion-button>
+
+      <ion-button fill="clear" class="icon-btn pokemon-btn" (click)="sendPokemon()" type="button"
+        title="Buscar Pokémon (usa el texto del mensaje)">
+        <ion-icon name="logo-octocat"></ion-icon>
+      </ion-button>
+
+      <ion-button fill="clear" class="icon-btn photo-btn" (click)="presentPhotoOptions()" title="Foto">
+        <ion-icon name="camera"></ion-icon>
+        <span class="button-label">Foto</span>
+      </ion-button>
+
+      <ion-button fill="clear" class="icon-btn logout-btn" (click)="logout()" title="Salir">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span class="button-label">Salir</span>
+      </ion-button>
+    </div>
+  </form>
+</div>

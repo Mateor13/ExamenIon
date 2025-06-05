@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, runInInjectionContext } from '@angular/core';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
+
 
 const SUPABASE_PROFILES = 'profiles';
 
@@ -12,7 +14,7 @@ export class AutenticacionService {
   private supabase: SupabaseClient;
   private _currentUser: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
 
-  constructor() {
+  constructor(private firestore: Firestore) {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
     this.loadUser();
     this.supabase.auth.onAuthStateChange((event, session) => {
@@ -37,22 +39,23 @@ export class AutenticacionService {
     return this._currentUser.asObservable();
   }
 
-  async getProfileById(userId: string) {
-    const { data, error } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    if (error) return null;
-    return data;
+  async getFirestoreProfileById(userId: string): Promise<{ id: string, username?: string, avatar_url?: string } | null> {
+    const userDocRef = doc(this.firestore, 'profiles', userId);
+    const userSnap = await getDoc(userDocRef);
+    console.log('Buscando perfil:', userId, 'Existe:', userSnap.exists(), 'Datos:', userSnap.data());
+    if (userSnap.exists()) {
+      return userSnap.data() as { id: string, username?: string, avatar_url?: string };
+    }
+    return null;
   }
 
-  async saveProfile(name: string, imageFile: File) {
+  async saveProfile(username: string, imageFile: File) {
     const { data: userData, error: userError } = await this.supabase.auth.getUser();
     if (userError) throw userError;
     const userId = userData.user?.id;
     let avatar_url = '';
 
+    // 1. Subir imagen a Supabase y obtener URL pública
     if (imageFile && userId) {
       const filePath = `profiles/${userId}/${imageFile.name}`;
       const { error: uploadError } = await this.supabase.storage
@@ -67,11 +70,14 @@ export class AutenticacionService {
       avatar_url = publicUrlData.publicUrl;
     }
 
+    // 2. Guardar perfil en Firebase Firestore
     if (userId) {
-      const { error: profileError } = await this.supabase
-        .from(SUPABASE_PROFILES)
-        .upsert([{ id: userId, name, avatar_url }]);
-      if (profileError) throw profileError;
+      const profileData = {
+        id: userId,
+        username,
+        avatar_url
+      };
+      await setDoc(doc(this.firestore, 'profiles', userId), profileData);
     }
     return { success: true };
   }
