@@ -1,7 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 
 import { appRouting } from './app/app.routes';
-import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { AppComponent } from './app/app.component';
 import { IonicModule } from '@ionic/angular';
 import { importProvidersFrom } from '@angular/core';
@@ -12,9 +11,19 @@ import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { environment } from './environments/environment';
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
+import { routes } from './app/app.routes';
+import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
+
+
+defineCustomElements(window);
 
 bootstrapApplication(AppComponent, {
-  providers:[
+  providers: [
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    provideIonicAngular(),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     importProvidersFrom(IonicModule.forRoot()),
     appRouting,
     provideHttpClient(),
@@ -23,6 +32,3 @@ bootstrapApplication(AppComponent, {
     provideAuth(() => getAuth()),
   ]
 });
-
-// Inicializa los elementos personalizados de Ionic PWA
-defineCustomElements(window);
